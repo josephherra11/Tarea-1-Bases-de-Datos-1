@@ -1,0 +1,11 @@
+### Probar listar
+GET http://localhost:3000/api/empleados
+
+### Probar insertar
+POST http://localhost:3000/api/empleados
+Content-Type: application/json
+
+{
+  "nombre": "Prueba Nueva",
+  "salario": 350000
+}
