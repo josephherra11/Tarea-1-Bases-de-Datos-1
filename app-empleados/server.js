@@ -11,7 +11,8 @@ const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'ProyectoDB',
-  server: process.env.DB_SERVER || 'PINO',
+  server: process.env.DB_SERVER || 'mssql-201669-0.cloudclusters.net',
+  port: Number(process.env.DB_PORT) || 10029,
   options: {
     encrypt: true,
     trustServerCertificate: true
@@ -25,10 +26,17 @@ async function getPool() {
   return pool;
 }
 
+// ---------------------
+// Endpoint: Listar empleados
+// ---------------------
 app.get('/api/empleados', async (req, res) => {
   try {
     const p = await getPool();
-    const r = await p.request().execute('dbo.sp_listarEmpleados');
+    const r = await p.request()
+      .output('outResultCode', sql.Int) // Declaramos parámetro de salida
+      .execute('dbo.sp_listarEmpleados');
+
+    // Podés revisar r.output.outResultCode si necesitás
     res.json(r.recordset);
   } catch (err) {
     console.error(err);
@@ -36,42 +44,30 @@ app.get('/api/empleados', async (req, res) => {
   }
 });
 
+// ---------------------
+// Endpoint: Insertar empleado con error general
+// ---------------------
 app.post('/api/empleados', async (req, res) => {
   try {
     const { nombre, salario } = req.body;
-    if (typeof nombre !== 'string' || !nombre.trim()) {
-      return res.status(400).json({ error: 'Nombre es requerido' });
-    }
-    const nameOk = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(nombre.trim());
-    if (!nameOk) {
-      return res.status(400).json({ error: 'Nombre inválido (solo letras y guion)' });
-    }
     const num = Number(salario);
-    if (!Number.isFinite(num) || num <= 0) {
-      return res.status(400).json({ error: 'Salario inválido' });
-    }
 
     const p = await getPool();
     await p.request()
-      .input('Nombre', sql.VarChar(128), nombre.trim())
-      .input('Salario', sql.Money, num)
+      .input('inNombre', sql.VarChar(128), nombre)
+      .input('inSalario', sql.Money, num)
+      .output('outResultCode', sql.Int)
       .execute('dbo.sp_insertarEmpleado');
 
-    res.status(201).json({ message: 'Inserción exitosa' });
+    res.status(201).json({ message: 'Empleado insertado correctamente' });
   } catch (err) {
-    const msg = err.originalError?.info?.message || err.message;
-    if (msg && msg.toLowerCase().includes('ya existe')) {
-      return res.status(409).json({ error: 'Nombre de Empleado ya existe.' });
-      }
-    if (msg && (msg.includes('Nombre vacío') || msg.includes('Salario inválido'))) {
-      return res.status(400).json({ error: msg });
-    }
     console.error(err);
-    res.status(500).json({ error: 'Error al insertar empleado' });
+    // Mostrar solo error general
+    res.status(400).json({ error: 'No se puede ingresar el usuario.' });
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10029;
 app.listen(PORT, () => {
   console.log(`Servidor listo en http://localhost:${PORT}`);
 });

@@ -15,6 +15,7 @@ function mostrarLista() {
   listaSection.classList.remove('hidden');
   cargarEmpleados();
 }
+
 function mostrarInsertar() {
   listaSection.classList.add('hidden');
   insertSection.classList.remove('hidden');
@@ -35,7 +36,7 @@ async function cargarEmpleados() {
     for (const emp of data) {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${emp.id}</td>
+        <td>${emp.ID || emp.id}</td>
         <td>${emp.Nombre}</td>
         <td>${Number(emp.Salario).toLocaleString('es-CR', { style: 'currency', currency: 'CRC' })}</td>
       `;
@@ -52,6 +53,7 @@ function validarNombre(nombre) {
   const re = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/;
   return re.test(nombre.trim());
 }
+
 function validarSalario(s) {
   const num = Number(s);
   return Number.isFinite(num) && num > 0;
@@ -80,12 +82,18 @@ formInsertar?.addEventListener('submit', async (e) => {
       body: JSON.stringify({ nombre, salario })
     });
     const body = await resp.json();
+
     if (!resp.ok) {
       insertMensaje.textContent = body.error || 'No se pudo insertar.';
       return;
     }
-    alert('Inserción exitosa');
-    mostrarLista();
+
+    // Éxito: mostramos mensaje pero NO regresamos a la lista
+     alert('Inserción exitosa');
+
+    // Limpiar el formulario para poder ingresar otro empleado
+    formInsertar.reset();
+    txtNombre.focus();
   } catch (e) {
     console.error(e);
     insertMensaje.textContent = 'Error de red.';
