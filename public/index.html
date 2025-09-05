@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Empleados</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Empleados</h1>
+  </header>
+
+  <main>
+    <section id="listaSection">
+      <div class="toolbar">
+        <button id="btnIrInsertar">Insertar Empleado</button>
+      </div>
+      <table id="grid">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Salario</th>
+          </tr>
+        </thead>
+        <tbody id="gridBody"></tbody>
+      </table>
+      <div id="listaMensaje" class="msg"></div>
+    </section>
+
+    <section id="insertSection" class="hidden">
+      <h2>Insertar Empleado</h2>
+      <form id="formInsertar">
+        <label>
+          Nombre:
+          <input type="text" id="txtNombre" required maxlength="128" />
+        </label>
+        <label>
+          Salario:
+          <input type="text" id="txtSalario" required placeholder="300000.00" />
+        </label>
+        <div class="acciones">
+          <button type="button" id="btnRegresar">Regresar</button>
+          <button type="submit" id="btnInsertar">Insertar</button>
+        </div>
+        <div id="insertMensaje" class="msg"></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
